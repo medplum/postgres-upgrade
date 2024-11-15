@@ -1,0 +1,50 @@
+{
+  "name": "medplum-postgres-upgrade",
+  "version": "0.0.1",
+  "private": false,
+  "description": "Medplum Postgres Server upgrade tools",
+  "scripts": {
+    "start": "npx tsx src/dashboard.ts",
+    "build": "tsc",
+    "sync-to-jumpbox": "scp -r src jumpbox:~/medplum-postgres-upgrade",
+    "sync-to-jumpbox:full": "scp -r * jumpbox:~/medplum-postgres-upgrade"
+  },
+  "prettier": {
+    "printWidth": 120,
+    "singleQuote": true,
+    "trailingComma": "es5"
+  },
+  "eslintConfig": {
+    "extends": [
+      "@medplum/eslint-config"
+    ],
+    "rules": {
+      "@typescript-eslint/explicit-function-return-type": "off"
+    },
+    "overrides": [
+      {
+        "files": [
+          "*.ts"
+        ],
+        "rules": {
+          "@typescript-eslint/explicit-function-return-type": 2
+        }
+      }
+    ]
+  },
+  "devDependencies": {
+    "@medplum/eslint-config": "3.2.22",
+    "@types/blessed": "0.1.25",
+    "@types/pg": "8.11.10",
+    "@types/pg-format": "1.0.5",
+    "blessed": "0.1.81",
+    "commander": "12.1.0",
+    "node-ssh": "13.2.0",
+    "pg": "8.13.1",
+    "pg-format": "1.0.4",
+    "typescript": "5.6.3"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  }
+}

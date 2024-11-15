@@ -1,0 +1,32 @@
+{
+  "blue": {
+    "host": "<blue-database-host>",
+    "port": 5432,
+    "database": "medplum",
+    "user": "<username>"
+  },
+  "green": {
+    "host": "<green-database-host>",
+    "port": 5432,
+    "database": "medplum",
+    "user": "<username>"
+  },
+  "proxy": {
+    "host": "<pgbouncer-host>",
+    "port": 5432,
+    "database": "medplum",
+    "user": "<username>",
+    "ssl": {
+      "rejectUnauthorized": false
+    }
+  },
+  "pgbouncer": {
+    "host": "<pgbouncer-host>",
+    "port": 5432,
+    "database": "pgbouncer",
+    "user": "pgbouncer_admin",
+    "ssl": {
+      "rejectUnauthorized": false
+    }
+  }
+}
