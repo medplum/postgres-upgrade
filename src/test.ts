@@ -1,73 +1,37 @@
 import { Client } from 'pg';
-import { cutover } from './switchover';
-import {
-  BlueConnection,
-  checkConnectivity,
-  checkDataEquivalency,
-  connect,
-  getConnections,
-  getSequenceLast,
-  GreenConnection,
-  PgbouncerConnection,
-  ProxyConnection,
-} from './db';
+import { checkConnectivity, checkDataEquivalency, connectAll, DBClients, getConnections, getSequenceLast } from './db';
 import { shutdown } from './utils';
 
-let blueClient: Client;
-let greenClient: Client;
-let proxyClient: Client;
-let pgbouncerClient: Client;
+let clients: DBClients;
 
-const TEST_CUTOVER = false;
-const TEST_GET_CONNECTIONS = false;
-const TEST_SEQUENCE_STATEMENTS = false;
+const TEST_GET_CONNECTIONS = true;
+const TEST_SEQUENCE_STATEMENTS = true;
 const TEST_DATA_EQUIVALENCE = true;
 
 async function main(): Promise<void> {
-  blueClient = await connect(BlueConnection);
-  greenClient = await connect(GreenConnection);
-  proxyClient = await connect(ProxyConnection);
-  pgbouncerClient = await connect(PgbouncerConnection);
+  clients = await connectAll();
 
-  const checkResults = await checkConnectivity({ blueClient, greenClient, pgbouncerClient });
+  const checkResults = await checkConnectivity({
+    blueClient: clients.blue,
+    greenClient: clients.green,
+    pgbouncerClient: clients.pgbouncer,
+  });
   console.log('Check results:', checkResults);
 
   if (TEST_GET_CONNECTIONS) {
-    await testGetConnections(blueClient);
+    await testGetConnections(clients.blue);
   }
   if (TEST_SEQUENCE_STATEMENTS) {
-    await testSequenceStatements(blueClient);
-  }
-
-  if (TEST_CUTOVER) {
-    const result = await cutover({
-      dbName: 'medplum',
-      replicationSlotName: 'my_replication_slot',
-      pgbouncerClient,
-      proxyClient,
-      blueClient,
-      greenClient,
-      dryRun: true,
-      resourceMinimums: {
-        Patient: 1,
-      },
-    });
-    console.log('Cutover result:', result);
+    await testSequenceStatements(clients.blue);
   }
 
   if (TEST_DATA_EQUIVALENCE) {
-    const startTimestamp = '2024-10-21 15:00:00'; // 30 minutes before clone created
-    await checkDataEquivalency({
-      tableName: 'Task',
-      startTimestamp,
-      blueClient,
-      greenClient,
-    });
+    const startTimestamp = '2024-10-21 15:00:00'; // adjust to be 30 minutes before clone created; in UTC
     await checkDataEquivalency({
       tableName: 'AuditEvent',
       startTimestamp,
-      blueClient,
-      greenClient,
+      blueClient: clients.blue,
+      greenClient: clients.green,
     });
   }
 }

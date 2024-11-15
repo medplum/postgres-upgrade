@@ -4,8 +4,10 @@
   "private": false,
   "description": "Medplum Postgres Server upgrade tools",
   "scripts": {
-    "start": "npx tsx src/dashboard.ts",
     "build": "tsc",
+    "dashboard": "npx tsx src/dashboard.ts",
+    "test": "npx tsx src/test.ts",
+    "switchover": "npx tsx src/switchover.ts",
     "sync-to-jumpbox": "scp -r src jumpbox:~/medplum-postgres-upgrade",
     "sync-to-jumpbox:full": "scp -r * jumpbox:~/medplum-postgres-upgrade"
   },
@@ -42,6 +44,7 @@
     "node-ssh": "13.2.0",
     "pg": "8.13.1",
     "pg-format": "1.0.4",
+    "tsx": "4.19.2",
     "typescript": "5.6.3"
   },
   "engines": {

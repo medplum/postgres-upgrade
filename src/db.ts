@@ -74,6 +74,51 @@ export async function connect(config: ConnectionInfo): Promise<Client> {
   return client;
 }
 
+export type DBClients = {
+  blue: Client;
+  green: Client;
+  proxy: Client;
+  pgbouncer: Client;
+};
+
+export async function connectAll(): Promise<DBClients> {
+  const clients: DBClients = {} as DBClients;
+
+  function logClientStatus(): void {
+    function getStatus(client: Client | undefined): string {
+      return client ? 'YES' : ' - ';
+    }
+
+    Object.entries(clients).map(([name, client]) => `${name}=${getStatus(client)}`);
+    console.log(
+      `blue=${getStatus(clients.blue)} green=${getStatus(clients.green)} proxy=${getStatus(
+        clients.proxy
+      )} pgbouncer=${getStatus(clients.pgbouncer)}`
+    );
+  }
+
+  await Promise.all([
+    connect(BlueConnection).then((client) => {
+      clients.blue = client;
+      logClientStatus();
+    }),
+    connect(GreenConnection).then((client) => {
+      clients.green = client;
+      logClientStatus();
+    }),
+    connect(ProxyConnection).then((client) => {
+      clients.proxy = client;
+      logClientStatus();
+    }),
+    connect(PgbouncerConnection).then((client) => {
+      clients.pgbouncer = client;
+      logClientStatus();
+    }),
+  ]);
+
+  return clients;
+}
+
 type CheckConnectivityResults = {
   blue?: Error | string;
   green?: Error | string;
